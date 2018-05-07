@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const tasksSchema = new mongoose.Schema({
-	task: { type: String }, 
+	task: { type: String }, isSelected: { type: Boolean }
 },
 { collection: "tasks", strict: false });
 
