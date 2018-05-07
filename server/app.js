@@ -2,13 +2,30 @@ var express = require('express');
 var path = require('path');
 var favicon = require('serve-favicon');
 var logger = require('morgan');
+const http = require('http');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+const mongoose = require('mongoose');
+const config = require('./config/database');
 
 var index = require('./routes/index');
 var users = require('./routes/users');
 
 var app = express();
+
+mongoose.Promise = global.Promise;
+
+mongoose.connect(config.database);
+
+mongoose.connection.on('connected', () => {
+  console.log('Connected to database ' + config.database);
+});
+
+mongoose.connection.on('error', (err) => {
+  console.log('database error:' + err);
+});
+
+const connection = mongoose.connection;
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
