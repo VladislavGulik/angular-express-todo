@@ -1,4 +1,5 @@
 const express = require('express');
+const app = express();
 const path = require('path');
 const favicon = require('serve-favicon');
 const logger = require('morgan');
@@ -6,21 +7,22 @@ const http = require('http');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
+const pg = require('pg');
 const config = require('./config/database');
+const dotenv = require('dotenv').config();
 
 const index = require('./routes/index');
 const users = require('./routes/users');
 const task = require('./routes/task');
 const tasks = require('./routes/tasks');
 
-const app = express();
-
+//---------------------------------------------MONGOOSE CONNECTION
 mongoose.Promise = global.Promise;
 
-mongoose.connect(config.database);
+mongoose.connect(process.env.MONGO_CONNECTION_STRING);
 
 mongoose.connection.on('connected', () => {
-  console.log('Connected to database ' + config.database);
+  console.log('Connected to database ' + process.env.MONGO_CONNECTION_STRING);
 });
 
 mongoose.connection.on('error', (err) => {
@@ -28,6 +30,18 @@ mongoose.connection.on('error', (err) => {
 });
 
 const connection = mongoose.connection;
+
+//---------------------------------------------POSTGRES CONNECTION
+const client = new pg.Client(process.env.POSTGRES_CONNECTION_STRING);
+
+client.connect((err) => {
+  if(err) return console.error('could not connect to postgres', err);
+  client.query('SELECT NOW() AS "theTime"', (err, result) => {
+    if(err) return console.error('error running query', err);
+    console.log(`Connected to postgres database ${result.rows[0].theTime}`);
+    client.end();
+  });
+})
 
 // view engine setup
 // app.set('views', path.join(__dirname, 'views'));
