@@ -34,14 +34,62 @@ const connection = mongoose.connection;
 //---------------------------------------------POSTGRES CONNECTION
 const client = new pg.Client(process.env.POSTGRES_CONNECTION_STRING);
 
-client.connect((err) => {
+client.connect(async(err) => {
   if(err) return console.error('could not connect to postgres', err);
-  client.query('SELECT NOW() AS "theTime"', (err, result) => {
+  await client.query('SELECT NOW() AS "theTime"', (err, result) => {
     if(err) return console.error('error running query', err);
     console.log(`Connected to postgres database ${result.rows[0].theTime}`);
-    client.end();
   });
-})
+  await client.query(`CREATE TABLE users(
+      User_ID INT PRIMARY KEY NOT NULL,
+      Username TEXT NOT NULL,
+      Password TEXT NOT NULL,
+      Status   TEXT NOT NULL
+);
+
+CREATE TABLE services(
+    Service_ID INT PRIMARY KEY NOT NULL,
+    Service_name TEXT NOT NULL,
+    Hosting BOOLEAN NULL DEFAULT false,
+    Cloud BOOLEAN NULL DEFAULT false,
+    Analytics BOOLEAN NULL DEFAULT false
+
+);
+
+CREATE TABLE user_services(
+    User_ID INT unique  REFERENCES users ON DELETE RESTRICT,    
+    Service_ID INT unique  REFERENCES services ON DELETE CASCADE,
+    PRIMARY KEY (User_ID , Service_ID )
+ );`, (err, result) => {
+    if (err) return console.log(err);
+    
+  });
+  await client.query(`CREATE TABLE user_services(
+    User_ID INT unique  REFERENCES users ON DELETE RESTRICT,    
+    Service_ID INT unique  REFERENCES services ON DELETE CASCADE,
+    PRIMARY KEY (User_ID , Service_ID )
+ );`, (err, result) => {
+    if(err) return console.log(err);
+  });
+  await client.query(`ALTER TABLE users
+    ADD Services_allow_to_user INT REFERENCES user_services(Service_ID)`, (err, result) => {
+    if (err) return console.log(err);
+  });
+  await client.query(`ALTER TABLE services
+    ADD users INT REFERENCES user_services(User_ID)`, (err, result) => {
+      if (err) return console.log(err);
+      client.end();
+  });
+});
+
+// client.query(`CREATE TABLE users(
+//   User_ID INT PRIMARY KEY NOT NULL,
+//   Username TEXT NOT NULL,
+//   Password TEXT NOT NULL,
+//   Status   TEXT NOT NULL
+//     );`, (err, result) => {
+//     if (err) return console.error('error running query', err);
+// });
 
 // view engine setup
 // app.set('views', path.join(__dirname, 'views'));
