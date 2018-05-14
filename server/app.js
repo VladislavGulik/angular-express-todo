@@ -40,36 +40,30 @@ client.connect(async(err) => {
     console.log(`Connected to postgres database ${result.rows[0].theTime}`);
   });
   await client.query(`CREATE TABLE users(
-      User_ID SERIAL PRIMARY KEY ,
-      Username TEXT NOT NULL,
-      Password TEXT NOT NULL,
-      Status   TEXT NOT NULL
+      id SERIAL PRIMARY KEY,
+      username TEXT NOT NULL,
+      password TEXT NOT NULL,
+      status   TEXT NOT NULL
   );
   CREATE TABLE services(
-      Service_ID SERIAL PRIMARY KEY NOT NULL,
-      Service_name TEXT NOT NULL,
-      Hosting BOOLEAN NULL DEFAULT false,
-      Cloud BOOLEAN NULL DEFAULT false,
-      Analytics BOOLEAN NULL DEFAULT false
+      id SERIAL PRIMARY KEY,
+      service_name TEXT NOT NULL,
+      hosting BOOLEAN NULL DEFAULT false,
+      cloud BOOLEAN NULL DEFAULT false,
+      analytics BOOLEAN NULL DEFAULT false
   );`, (err, result) => {
       if (err) return console.log(err);
   });
   await client.query(`CREATE TABLE user_services(
-    User_ID SERIAL unique REFERENCES users ON DELETE RESTRICT,    
-    Service_ID SERIAL unique REFERENCES services ON DELETE CASCADE,
-    PRIMARY KEY (User_ID , Service_ID)
+    id SERIAL,
+    user_id INTEGER REFERENCES users ON DELETE RESTRICT,    
+    service_id INTEGER REFERENCES services ON DELETE CASCADE,
+    PRIMARY KEY (id, user_id, service_id)
   );`, (err, result) => {
     if(err) return console.log(err);
   });
-  await client.query(`ALTER TABLE users
-    ADD Services_allow_to_user SERIAL REFERENCES user_services(Service_ID)`, (err, result) => {
-    if (err) return console.log(err);
-  });
-  await client.query(`ALTER TABLE services
-    ADD users SERIAL REFERENCES user_services(User_ID)`, (err, result) => {
-      if (err) return console.log(err);
-      client.end();
-  });
+  //JOIN
+  //select * from user_services INNER JOIN Services ON (user_services.id = Services.id) where user_services.id = 1
 });
 
 // view engine setup
