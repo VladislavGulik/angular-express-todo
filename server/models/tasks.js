@@ -1,21 +1,36 @@
 const mongoose = require('mongoose');
 
 const tasksSchema = new mongoose.Schema({
-	task: { type: String }, isSelected: { type: Boolean, default: false }
-},
-{ collection: "tasks", strict: false });
+	title: {
+		type: String,
+		required: true,
+	},
+	isSelected: {
+		type: Boolean,
+		default: false,
+	},
+	description: {
+		type: String,
+	},
+}, {
+	collection: 'tasks',
+	strict: false
+});
 
 const Tasks = mongoose.model('Tasks', tasksSchema);
 
 module.exports = Tasks;
 
 module.exports.saveTasks = function(task, cb) {
+	debugger;
 	console.log(task);
 	return task.save((err) => {
 		if (err) {
+			debugger;
 			console.log(err);
 		} else {
-			cb(null, 'message');
+			debugger;
+			cb(null);
 		}
 	});
 };
