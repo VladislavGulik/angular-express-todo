@@ -11,11 +11,15 @@ const pg = require('pg');
 const Sequelize = require('sequelize');
 const config = require('./config/database');
 const dotenv = require('dotenv').config();
+const flash = require('connect-flash');
+const passport = require('passport');
+const localStrategy = require('passport-local').Strategy;
+const httpStrategy = require('passport-http').Strategy;
 
+//---------------------------------------------ROUTES
 const index = require('./routes/index');
 const users = require('./routes/users');
 const task = require('./routes/task');
-const tasks = require('./routes/tasks');
 
 //---------------------------------------------MONGOOSE CONNECTION
 mongoose.Promise = global.Promise;
@@ -31,6 +35,18 @@ mongoose.connection.on('error', (err) => {
 });
 
 const connection = mongoose.connection;
+
+//---------------------------------------------SEQUALIZE
+const sequelize = new Sequelize(process.env.POSTGRES_CONNECTION_STRING);
+
+sequelize
+.authenticate()
+.then(() => {
+  console.log('Connection has been established successfully.');
+})
+.catch(err => {
+  console.error('Unable to connect to the database:', err);
+});
 
 //---------------------------------------------PG POSTGRES MIGRATION
 // const client = new pg.Client(process.env.POSTGRES_CONNECTION_STRING);
@@ -70,19 +86,6 @@ const connection = mongoose.connection;
 // view engine setup
 // app.set('views', path.join(__dirname, 'views'));
 // app.set('view engine', 'jade');
-
-//---------------------------------------------SEQUALIZE
-const sequelize = new Sequelize(process.env.POSTGRES_CONNECTION_STRING);
-
-sequelize
-  .authenticate()
-  .then(() => {
-    console.log('Connection has been established successfully.');
-  })
-  .catch(err => {
-    console.error('Unable to connect to the database:', err);
-  });
-
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
