@@ -25,8 +25,9 @@ router.post('/', function (req, res) {
     const newTask = Task(req.body);
     Task.saveTasks(newTask, (err, task) => {
         // if (err) throw new Error(err);
+        debugger;
         console.log('END');
-        res.send("task");
+        res.send(task);
     });
     // if (errors && errors.length) {
     //     console.log(errors);

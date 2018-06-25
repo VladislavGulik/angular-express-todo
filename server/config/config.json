@@ -1,0 +1,10 @@
+{
+    "development": {
+        "use_env_variable": "process.env.POSTGRES_CONNECTION_STRING",
+        "dialect": "postgres"
+    },
+    "production": {
+        "use_env_variable": "process.env.POSTGRES_CONNECTION_STRING",
+        "dialect": "postgres"
+    }
+}

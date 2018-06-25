@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 const path = require('path');
+const morgan = require('morgan');
 const favicon = require('serve-favicon');
 const logger = require('morgan');
 const http = require('http');
@@ -9,17 +10,19 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const pg = require('pg');
 const Sequelize = require('sequelize');
-const config = require('./config/database');
 const dotenv = require('dotenv').config();
 const flash = require('connect-flash');
+const session = require('express-session');
+const expressValidator = require('express-validator');
 const passport = require('passport');
-const localStrategy = require('passport-local').Strategy;
+const LocalStrategy = require('passport-local').Strategy;
 const httpStrategy = require('passport-http').Strategy;
 
 //---------------------------------------------ROUTES
 const index = require('./routes/index');
 const users = require('./routes/users');
 const task = require('./routes/task');
+const tasks = require('./routes/tasks');
 
 //---------------------------------------------MONGOOSE CONNECTION
 mongoose.Promise = global.Promise;
@@ -38,14 +41,56 @@ const connection = mongoose.connection;
 
 //---------------------------------------------SEQUALIZE
 const sequelize = new Sequelize(process.env.POSTGRES_CONNECTION_STRING);
+sequelize.Promise = global.Promise;
 
 sequelize
 .authenticate()
 .then(() => {
-  console.log('Connection has been established successfully.');
+  console.log('Connection to postgres has been established successfully.');
 })
 .catch(err => {
   console.error('Unable to connect to the database:', err);
+});
+
+//---------------------------------------------Express Session
+app.use(session({
+  secret: 'secret',
+  saveUninitiazized: true,
+  resave: true,
+}));
+
+//---------------------------------------------Passport init
+app.use(passport.initialize());
+app.use(passport.session());
+
+//---------------------------------------------Express Validator
+app.use(expressValidator({
+  errorFormatter: function (param, msg, value) {
+    var namespace = param.split('.')
+      , root = namespace.shift()
+      , formParam = root;
+
+    while (namespace.length) {
+      formParam += '[' + namespace.shift() + ']';
+    }
+    return {
+      param: formParam,
+      msg: msg,
+      value: value
+    };
+  }
+}));
+
+//---------------------------------------------Connect Flash
+app.use(flash());
+
+//---------------------------------------------Global Vars
+app.use(function (req, res, next) {
+  res.locals.success_msg = req.flash('success_msg');
+  res.locals.error_msg = req.flash('error_msg');
+  res.locals.error = req.flash('error');
+  res.locals.user = req.user || null;
+  next();
 });
 
 //---------------------------------------------PG POSTGRES MIGRATION
