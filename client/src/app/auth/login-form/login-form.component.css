@@ -1,0 +1,17 @@
+.login-form {
+  text-align: center;
+  padding: 140px;
+  margin: 0 auto;
+  width: 500px;
+  height: 500px;
+  background-color: rgba(155,155,155,0.2);
+}
+
+.login-inputs {
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-around;
+  flex-direction: column;
+  width: 200px;
+  height: 200px;
+}
